@@ -1,0 +1,1 @@
+import Link from "next/link";import {AccountForm} from "@/components/account-forms";export const metadata={title:"Sign in"};export default function Login(){return <main className="inner-content"><AccountForm mode="login"/><p style={{textAlign:"center",fontSize:10,marginTop:18}}>New here? <Link href="/register">Create an account</Link></p></main>;}

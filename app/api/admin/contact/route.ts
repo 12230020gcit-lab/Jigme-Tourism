@@ -1,0 +1,3 @@
+import {NextResponse} from "next/server";import {z} from "zod";import {getSession} from "@/lib/auth";import {prisma} from "@/lib/prisma";
+const schema=z.object({id:z.string().min(1),handled:z.boolean()});
+export async function PATCH(req:Request){const session=await getSession();if(session?.role!=="ADMIN")return NextResponse.json({error:"Not authorized"},{status:403});const parsed=schema.safeParse(await req.json().catch(()=>null));if(!parsed.success)return NextResponse.json({error:"Invalid update"},{status:400});try{await prisma.contactMessage.update({where:{id:parsed.data.id},data:{handled:parsed.data.handled}});return NextResponse.json({ok:true});}catch{return NextResponse.json({error:"Could not update message"},{status:404});}}

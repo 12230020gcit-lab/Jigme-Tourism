@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  VISITOR
+  ADMIN
+}
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  QUOTATION_SENT
+  AWAITING_CONFIRMATION
+  CONFIRMED
+  PAYMENT_ARRANGED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(VISITOR)
+  createdAt DateTime @default(now())
+  inquiries BookingInquiry[]
+}
+
+model Destination {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  region      String
+  summary     String
+  description String   @db.Text
+  image       String
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model TourPackage {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  duration     String
+  destinations String[]
+  summary      String   @db.Text
+  highlights   String[]
+  itinerary    Json
+  image        String
+  published    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  inquiries    BookingInquiry[]
+}
+
+model BookingInquiry {
+  id                 String        @id @default(cuid())
+  reference          String        @unique
+  fullName           String
+  email              String
+  phone              String
+  country            String
+  nationality        String?
+  arrivalDate        DateTime?
+  departureDate      DateTime?
+  travelers          Int
+  adults             Int
+  children           Int            @default(0)
+  accommodation      String
+  specialRequests    String?        @db.Text
+  status             InquiryStatus  @default(NEW)
+  internalNotes      String?        @db.Text
+  userId             String?
+  user               User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tourPackageId      String?
+  tourPackage        TourPackage?   @relation(fields: [tourPackageId], references: [id], onDelete: SetNull)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String
+  phone     String?
+  subject   String
+  message   String   @db.Text
+  handled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  customerName String
+  country      String
+  rating       Int
+  text         String   @db.Text
+  packageName  String?
+  verified     Boolean  @default(false)
+  published    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model SiteSettings {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
